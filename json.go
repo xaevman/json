@@ -1,4 +1,17 @@
+//  ---------------------------------------------------------------------------
+//
+//  json.go
+//
+//  Copyright (c) 2016, Jared Chavez. 
+//  All rights reserved.
+//
+//  Use of this source code is governed by a BSD-style
+//  license that can be found in the LICENSE file.
+//
+//  -----------
 
+// Package json provides types and functions for parsing, building, and
+// working with JSON documents.
 package json
 
 import (
@@ -8,6 +21,7 @@ import (
     "strconv"
 )
 
+// Element type enumeration.
 const (
     TypeObject = iota
     TypeArray
@@ -20,6 +34,9 @@ var typeLookup = map[int]string {
     2 : "Value",
 }
 
+// Element presents the interface that the different types of JSON
+// elements must implement. The existing types of elements are Array,
+// Object, and Value.
 type Element interface {
     AppendChild(Element) error
     Children()           []Element
@@ -35,6 +52,8 @@ type Element interface {
     Value()              interface{}
 }
 
+// ParseJSON reads a block of JSON data and attempts to parse it
+// into a JSON Element object and sub-objects.
 func ParseJSON(data []byte) (Element, error) {
     var jsonData interface{}
 
@@ -51,6 +70,10 @@ func ParseJSON(data []byte) (Element, error) {
     return obj, err
 }
 
+// Search allows you to search through the given JSON element
+// using dotted notation. Square brackets [] are used to denote
+// array element indexes where needed.
+// Ex: myobject.myarray[1].myvalue
 func Search(e Element, path string) (Element, error) {
     curVal := e
     
@@ -81,6 +104,7 @@ func Search(e Element, path string) (Element, error) {
     return curVal, nil
 }
 
+// get attempts to retrieve a child of the given element by key name.
 func get(e Element, key string) (Element, error) {
     switch obj := e.(type) {
         case *Object:
@@ -103,6 +127,7 @@ func get(e Element, key string) (Element, error) {
     return nil, err
 }
 
+// getIdx attempts to retrieve a child of the given elemnent by array index.
 func getIdx(e Element, idx int) (Element, error) {
     switch obj := e.(type) {
         case *Object:
@@ -133,6 +158,10 @@ func getIdx(e Element, idx int) (Element, error) {
     return nil, err
 }
 
+// newItem recursively builds up a new JSON Element with the given name and parent
+// from the provided data. Simple values are converted into Value elements. 
+// map[string]interface{} data value are converted to JSON Objects. interface{}
+// arrays are converted into Array elements.
 func newItem(parent Element, name string, data interface{}) (Element, error) {
     var result Element
 
@@ -158,6 +187,8 @@ func newItem(parent Element, name string, data interface{}) (Element, error) {
     return result, nil
 }
 
+// parsePathPart takes a given path element and attempts to parse it
+// for key names and array indexes.
 func parsePathPart(item string) (string, []int) {
     key      := ""
     startIdx := 0

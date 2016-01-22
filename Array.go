@@ -1,3 +1,15 @@
+//  ---------------------------------------------------------------------------
+//
+//  Array.go
+//
+//  Copyright (c) 2016, Jared Chavez. 
+//  All rights reserved.
+//
+//  Use of this source code is governed by a BSD-style
+//  license that can be found in the LICENSE file.
+//
+//  -----------
+
 package json
 
 import (
@@ -5,6 +17,7 @@ import (
     "fmt"
 )
 
+// Array implements the Element interface for JSON Array types.
 type Array struct {
     children []Element
     dType    int
@@ -13,14 +26,17 @@ type Array struct {
     value    []interface{}
 }
 
+// NewArray returns a new Array object as an Element interface type.
 func NewArray(name string) Element {
     return &Array {
         children : make([]Element, 0),
+        dType    : TypeArray,
         name     : name,
         value    : make([]interface{}, 0),
     }
 }
 
+// AppendChild appends a new child Element to this Array object.
 func (this *Array) AppendChild(child Element) error {
     if child == nil {
         return fmt.Errorf("Can't append nil child")
@@ -34,26 +50,38 @@ func (this *Array) AppendChild(child Element) error {
     return nil
 }
 
+// Children returns a slice of the child Elements in this Array.
 func (this *Array) Children() []Element {
     return this.children
 }
 
+// ChildrenLen returns the number of children present in this
+// Array.
 func (this *Array) ChildrenLen() int {
     return len(this.children)
 }
 
+// MarshalJSON implements the standard golang json marshaller 
+// interface for Array.
 func (this *Array) MarshalJSON() ([]byte, error) {
     return json.Marshal(this.value)
 }
 
+// Name returns the parent object's key name for this Array.
 func (this *Array) Name() string {
     return this.name
 }
 
+// Parent returns a reference to this Array's parent element,
+// if one exists.
 func (this *Array) Parent() Element {
     return this.parent
 }
 
+// Set sets the internal value of this Array element to the
+// provided value. val should be of the type []interface{}
+// or an error will occur. Set will also cascade the creation
+// of all child elements present within val.
 func (this *Array) Set(val interface{}) error {
     valArr, ok := val.([]interface{})
     if !ok {
@@ -78,14 +106,17 @@ func (this *Array) Set(val interface{}) error {
     return nil
 }
 
-func (this *Array) SetParent(parent Element) {
-    this.parent = parent
-}
-
+// SetName sets the parent object's key value for this Array.
 func (this *Array) SetName(name string) {
     this.name = name
 }
 
+// SetParent sets the parent Element for this Array.
+func (this *Array) SetParent(parent Element) {
+    this.parent = parent
+}
+
+// String pretty-prints this Array object.
 func (this *Array) String() string {
     return fmt.Sprintf(
         "type: %s, children: %d, value: %v",
@@ -95,10 +126,13 @@ func (this *Array) String() string {
     )
 }
 
+// Type returns the type of JSON Element (TypeArray)
 func (this *Array) Type() int {
     return this.dType
 }
 
+// Value returns the underlying value object (of type []interface{})
+// for this Array.
 func (this *Array) Value() interface{} {
     return this.value
 }
