@@ -165,11 +165,11 @@ func get(e Element, key string) (Element, error) {
         case *Value:
             return nil, fmt.Errorf("Value does not support get by key")
         default:
-            err := fmt.Errorf("Invalid type")
+            err := fmt.Errorf("get : Invalid type (%v)", obj)
             return nil, err
     }
 
-    err := fmt.Errorf("Invalid type")
+    err := fmt.Errorf("get unknown error")
     return nil, err
 }
 
@@ -196,11 +196,11 @@ func getIdx(e Element, idx int) (Element, error) {
         case *Value:
             return nil, fmt.Errorf("Value does not support get by idx")
         default:
-            err := fmt.Errorf("Invalid type")
+            err := fmt.Errorf("getIdx : Invalid type (%v)", obj)
             return nil, err
     }
 
-    err := fmt.Errorf("Invalid type")
+    err := fmt.Errorf("getIdx unknown error")
     return nil, err
 }
 
@@ -227,7 +227,11 @@ func newItem(parent Element, name string, data interface{}) (Element, error) {
     case interface{}:
         result = NewValue(name, val)
     default:
-        return nil, fmt.Errorf("Invalid type: %v", val)
+        if name != "" {
+            result = NewValue(name, nil)
+        } else {
+            result = EmptyElement
+        }
     }
 
     return result, nil
