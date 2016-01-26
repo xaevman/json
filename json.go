@@ -34,6 +34,8 @@ var typeLookup = map[int]string {
     2 : "Value",
 }
 
+var EmptyElement = NewObject("empty")
+
 // Element presents the interface that the different types of JSON
 // elements must implement. The existing types of elements are Array,
 // Object, and Value.
@@ -52,29 +54,29 @@ type Element interface {
     Value()              interface{}
 }
 
-// ParseJSON reads a block of JSON data and attempts to parse it
+// Parse reads a block of JSON data and attempts to parse it
 // into a JSON Element object and sub-objects.
-func ParseJSON(data []byte) (Element, error) {
+func Parse(data []byte) Element {
     var jsonData interface{}
 
     err := json.Unmarshal(data, &jsonData)
     if err != nil {
-        return nil, err
+        return EmptyElement
     }
 
     obj, err := newItem(nil, "", jsonData)
     if err != nil {
-        return nil, err
+        return EmptyElement
     }
 
-    return obj, err
+    return obj
 }
 
 // Search allows you to search through the given JSON element
 // using dotted notation. Square brackets [] are used to denote
 // array element indexes where needed.
 // Ex: myobject.myarray[1].myvalue
-func Search(e Element, path string) (Element, error) {
+func Search(e Element, path string) Element {
     curVal := e
     
     pathParts := strings.Split(path, ".")
@@ -83,7 +85,7 @@ func Search(e Element, path string) (Element, error) {
         
         newVal, err := get(curVal, key)
         if err != nil {
-            return nil, err
+            return EmptyElement
         }
 
         if len(idxList) > 0 {
@@ -91,7 +93,7 @@ func Search(e Element, path string) (Element, error) {
                 // array
                 val, err := getIdx(newVal, idxList[x])
                 if err != nil {
-                    return nil, err
+                    return EmptyElement
                 }
 
                 newVal = val
@@ -101,7 +103,7 @@ func Search(e Element, path string) (Element, error) {
         curVal = newVal
     }
 
-    return curVal, nil
+    return curVal
 }
 
 // get attempts to retrieve a child of the given element by key name.

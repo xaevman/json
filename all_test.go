@@ -20,20 +20,15 @@ import (
 
 func TestParseJSON(t *testing.T) {
     // test parse
-    e, err := ParseJSON([]byte(jsonTxt))
-    if err != nil {
-        t.Fatal(err)
+    e := Parse([]byte(jsonTxt))
+    if e == EmptyElement {
+        t.Fatal()
     }
 
     // test object key-val
-    val, err := Search(e, "object.key")
-    if err != nil {
-        t.Fatal(err)
-    }
-    if val.Value().(string) != "val" {
+    if Search(e, "object.key").Value().(string) != "val" {
         t.Fatal()
     }
-    log.Printf("key : %s", val.Value())
 
     // test array indexing with sub-object
     ex1 := map[string]float64 { 
@@ -41,10 +36,7 @@ func TestParseJSON(t *testing.T) {
         "arr1o2v2" : 5, 
         "arr1o2v3" : 6,
     }
-    val, err = Search(e, "object.arrayObj[1]")
-    if err != nil {
-        t.Fatal(err)
-    }
+    val := Search(e, "object.arrayObj[1]")
     if val.ChildrenLen() != 3 {
         t.Fatal()
     }
@@ -57,16 +49,11 @@ func TestParseJSON(t *testing.T) {
                 v.Value(),
             )
         }
-        
-        log.Printf("%s : %v", v.Name(), v.Value())
     }
 
     // test array ordering
     ex2 := []string { "sub1", "sub2", "sub3" } 
-    val, err = Search(e, "object.array2[3]")
-    if err != nil {
-        t.Fatal(err)
-    }
+    val = Search(e, "object.array2[3]")
     if val.ChildrenLen() != 3{
         t.Fatal()
     }
@@ -77,44 +64,24 @@ func TestParseJSON(t *testing.T) {
     }
 
     // test array indexing traversal
-    val, err = Search(e, "object.arrayObj[0].arr1o1v2")
-    if err != nil {
-        t.Fatal(err)
-    }
-    if val.Value().(float64) != 2 {
+    if Search(e, "object.arrayObj[0].arr1o1v2").Value().(float64) != 2 {
         t.Fatal()
     }
-    log.Printf("val: %.0f", val.Value())
 
     // test multiple array traversal
-    val, err = Search(e, "object.array2[3][2]")
-    if err != nil {
-        t.Fatal(err)
-    }
-    if val.Value().(string) != "sub3" {
+    if Search(e, "object.array2[3][2]").Value().(string) != "sub3" {
         t.Fatal()
     }
-    log.Print(val.Value())
 
     // test a deeply embedded value
-    val, err = Search(e, "object.obj2.obj3.obj3Name")
-    if err != nil {
-        t.Fatal(err)
-    }
-    if val.Value().(string) != "indepth" {
+    if Search(e, "object.obj2.obj3.obj3Name").Value().(string) != "indepth" {
         t.Fatal()
     }
-    log.Print(val.Value())
 
     // test all
-    val, err = Search(e, "object.arrayObj[0].arr1o1v3.arrb[0]")
-    if err != nil {
-        t.Fatal(err)
-    }
-    if val.Value().(float64) != 1773 {
+    if Search(e, "object.arrayObj[0].arr1o1v3.arrb[0]").Value().(float64) != 1773 {
         t.Fatal()
     }
-    log.Print(val.Value())
 }
 
 func TestBuildJSON(t *testing.T) {
@@ -135,32 +102,20 @@ func TestBuildJSON(t *testing.T) {
     body.AppendChild(myObj)
     body.AppendChild(myOtherObj)
 
-    val, err := Search(body, "myobject.myarray[2]")
-    if err != nil {
-        t.Fatal(err)
-    }
-    if val.Value().(int) != 5 {
+    if Search(body, "myobject.myarray[2]").Value().(int) != 5 {
         t.Fatal()
     }
 
-    val, err = Search(body, "myobject.mykey")
-    if err != nil {
-        t.Fatal(err)
-    }
-    if val.Value().(string) != "myval" {
+    if Search(body, "myobject.mykey").Value().(string) != "myval" {
         t.Fatal()
     }
 
-    val, err = Search(body, "myOtherObject")
-    if err != nil {
-        t.Fatal(err)
+    val := Search(body, "myOtherObject")
+    if val == EmptyElement {
+        t.Fatal()
     }
 
-    val2, err := Search(val, "myKey2")
-    if err != nil {
-        t.Fatal(err)
-    }
-    if val2.Value().(string) != "myVal2" {
+    if Search(val, "myKey2").Value().(string) != "myVal2" {
         t.Fatal()
     }
 
