@@ -13,7 +13,6 @@
 package json
 
 import (
-    gojson "encoding/json"
     "log"
     "testing"
 )
@@ -82,6 +81,14 @@ func TestParseJSON(t *testing.T) {
     if Search(e, "object.arrayObj[0].arr1o1v3.arrb[0]").Value().(float64) != 1773 {
         t.Fatal()
     }
+
+    // test delete
+    Search(e, "object.arrayObj[0].arr1o1v1").Delete()
+    if Search(e, "object.arrayObj[0].arr1o1v1") != EmptyElement {
+        t.Fatal()
+    }
+
+    log.Println(e)
 }
 
 func TestBuildJSON(t *testing.T) {
@@ -119,12 +126,7 @@ func TestBuildJSON(t *testing.T) {
         t.Fatal()
     }
 
-    jsonBytes, err := gojson.MarshalIndent(&body, "", "    ")
-    if err != nil {
-        t.Fatal()
-    }
-
-    log.Println(string(jsonBytes))
+    log.Println(body)
 }
 
 const targetJson = `

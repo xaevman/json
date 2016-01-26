@@ -14,7 +14,6 @@ package json
 
 import (
     "encoding/json"
-    "fmt"
 )
 
 // Value implements the Element interface for Value types.
@@ -46,6 +45,12 @@ func (this *Value) Children() []Element {
 // ChildrenLen is not implemented for Value objects.
 func (this *Value) ChildrenLen() int {
     return 0
+}
+
+// Delete attempts to delete this Value from its parent Object
+// or Array.
+func (this *Value) Delete() {
+    deleteElement(this.parent, this)
 }
 
 // MarshalJSON implements the golang json marshaller for Value 
@@ -84,12 +89,8 @@ func (this *Value) SetParent(parent Element) {
 
 // String pretty-prints this Value.
 func (this *Value) String() string {
-    return fmt.Sprintf(
-        "name: %s, type: %s, value: %v",
-        this.name,
-        typeLookup[this.dType],
-        this.value,
-    )
+    jsonBytes, _ := json.MarshalIndent(&this.value, "", "    ")
+    return string(jsonBytes)
 }
 
 // Type returns the type of this JSON Element (TypeValue).

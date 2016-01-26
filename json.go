@@ -34,6 +34,9 @@ var typeLookup = map[int]string {
     2 : "Value",
 }
 
+// EmptyElement represents an empty JSON Element of any type
+// (though it is presented as an Object). EmptyElement is returned
+// during Search functions when no element is found.
 var EmptyElement = NewObject("empty")
 
 // Element presents the interface that the different types of JSON
@@ -41,17 +44,27 @@ var EmptyElement = NewObject("empty")
 // Object, and Value.
 type Element interface {
     AppendChild(Element) error
-    Children()           []Element
-    ChildrenLen()        int
-    Name()               string
-    MarshalJSON()        ([]byte, error)
-    Parent()             Element
-    Set(interface{})     error
-    SetName(string)
+    Children() []Element
+    ChildrenLen() int
+    Delete()
+    Name() string
+    Parent() Element
+    Set(interface{}) error
     SetParent(Element)
-    String()             string
-    Type()               int
-    Value()              interface{}
+    Value() interface{}
+}
+
+// Delete attempts to delete the element at the given path from the
+// supplied Element object.
+func Delete(e Element, path string) error {
+    el := Search(e, path)
+    if el == EmptyElement {
+        return fmt.Errorf("Path not found: %s", path)
+    }
+
+    el.Delete()
+
+    return nil
 }
 
 // Parse reads a block of JSON data and attempts to parse it
@@ -106,6 +119,37 @@ func Search(e Element, path string) Element {
     return curVal
 }
 
+func deleteElement(parent Element, child Element) {
+    if parent == nil {
+        return
+    }
+
+    if child == nil {
+        return
+    }
+
+    switch p := parent.(type) {
+    case *Object:
+        delete(p.children, child.Name())
+        delete(p.value, child.Name())
+    case *Array:
+        i := 0
+        for ; i < len(p.children); i++ {
+            if p.children[i] == child {
+                break
+            }
+        }
+
+        s := p.children
+        s = append(s[:i], s[i+1:]...)
+        p.children = s
+
+        ns := p.value
+        ns = append(ns[:i], ns[i+1:]...)
+        p.value = ns
+    }
+}
+
 // get attempts to retrieve a child of the given element by key name.
 func get(e Element, key string) (Element, error) {
     switch obj := e.(type) {
@@ -121,11 +165,11 @@ func get(e Element, key string) (Element, error) {
         case *Value:
             return nil, fmt.Errorf("Value does not support get by key")
         default:
-            err := fmt.Errorf("Invalid type (%d)", e.Type())
+            err := fmt.Errorf("Invalid type")
             return nil, err
     }
 
-    err := fmt.Errorf("Invalid type (%d)", e.Type())
+    err := fmt.Errorf("Invalid type")
     return nil, err
 }
 
@@ -152,11 +196,11 @@ func getIdx(e Element, idx int) (Element, error) {
         case *Value:
             return nil, fmt.Errorf("Value does not support get by idx")
         default:
-            err := fmt.Errorf("Invalid type (%d)", e.Type())
+            err := fmt.Errorf("Invalid type")
             return nil, err
     }
 
-    err := fmt.Errorf("Invalid type (%d)", e.Type())
+    err := fmt.Errorf("Invalid type")
     return nil, err
 }
 

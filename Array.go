@@ -61,6 +61,12 @@ func (this *Array) ChildrenLen() int {
     return len(this.children)
 }
 
+// Delete attempts to remove this Element from its parent Object
+// or Array.
+func (this *Array) Delete() {
+    deleteElement(this.parent, this)
+}
+
 // MarshalJSON implements the standard golang json marshaller 
 // interface for Array.
 func (this *Array) MarshalJSON() ([]byte, error) {
@@ -118,12 +124,8 @@ func (this *Array) SetParent(parent Element) {
 
 // String pretty-prints this Array object.
 func (this *Array) String() string {
-    return fmt.Sprintf(
-        "type: %s, children: %d, value: %v",
-        typeLookup[this.dType],
-        len(this.children),
-        this.value,
-    )
+    jsonBytes, _ := json.MarshalIndent(&this.value, "", "    ")
+    return string(jsonBytes)
 }
 
 // Type returns the type of JSON Element (TypeArray)
