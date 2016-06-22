@@ -43,9 +43,9 @@ func (this *Array) AppendChild(child Element) error {
     }
 
     child.SetParent(this)
-    this.children = append(this.children, child)
 
-    this.value = append(this.value, child.Value())
+    this.children = append(this.children, child)
+    this.value = append(this.value, child)
     
     return nil
 }
@@ -124,7 +124,7 @@ func (this *Array) SetParent(parent Element) {
 
 // String pretty-prints this Array object.
 func (this *Array) String() string {
-    jsonBytes, _ := json.MarshalIndent(&this.value, "", "    ")
+    jsonBytes, _ := json.MarshalIndent(&this, "", "    ")
     return string(jsonBytes)
 }
 

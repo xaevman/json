@@ -17,6 +17,34 @@ import (
     "testing"
 )
 
+func TestChangeVal(t *testing.T) {
+    e := Parse([]byte(jsonTxt))
+    if e == EmptyElement {
+        t.Fatal()
+    }
+
+    key := Search(e, "object.key")
+    if key == EmptyElement {
+        t.Fatal()
+    }
+
+    log.Printf("before: %+v\n", key)
+    key.Set("val2")
+    log.Printf("after: %+v\n", key)
+
+    val, ok := key.Value().(string)
+    if !ok {
+        t.Fatal()
+    }
+
+    log.Println(val)
+    if val != "val2" {
+        t.Fatal()
+    }
+
+    log.Printf("%+v\n", e)
+}
+
 func TestParseJSON(t *testing.T) {
     // test parse
     e := Parse([]byte(jsonTxt))

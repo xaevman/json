@@ -47,7 +47,7 @@ func (this *Object) AppendChild(child Element) error {
         return fmt.Errorf("Key already present (%s)", cName)
     }
 
-    this.value[cName] = child.Value()
+    this.value[cName] = child
 
     child.SetParent(this)
     this.children[cName] = child
@@ -136,7 +136,7 @@ func (this *Object) SetParent(parent Element) {
 
 // String pretty-prints this Object.
 func (this *Object) String() string {
-    jsonBytes, _ := json.MarshalIndent(&this.value, "", "    ")
+    jsonBytes, _ := json.MarshalIndent(&this, "", "    ")
     return string(jsonBytes)
 }
 
